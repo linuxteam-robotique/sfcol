@@ -1,0 +1,41 @@
+sfcol - Search For Color
+------------------------
+
+
+-- VERSION HISTORY --
+
+ 2004: sfcol  - Just search colors and calculate center of each objects
+
+~2006: sfcol2 - Improving efficiency for color calculation, quantity of given
+                informations about found objects and speed of the program
+
+ 2011: sfcol3 - Full revision of source code to use standard libv4l2 and 
+      	        libjpeg library and remove dead code and stranger code.
+                Source codes clearly becomes GPL3.
+
+
+-- COMPILING --
+
+You need the following libraries:
+- libv4l-dev (video4linux) used to grab pictures from video devices
+- libjpeg62-dev (libjpeg) used when you're video device supply JPEG images
+- libsdl1.2-dev (libsdl) used by the viewer application interface
+
+Next just have to execute the next commands:
+$ make
+
+
+-- TEST --
+
+Example using sfcol:
+$ ./sfcol -d /dev/video0 -s widthxheight -p 7070
+  => This means:
+     - video device to grab pictures is /dev/video0 (chosen by default)
+     - set the grab video images to _width_ by _height_ pixels lenght
+     - used port is 7070 to accept TCP client (chosen by default as well)
+
+Example using  viewer:
+$ ./viewer hostname:7070
+  => This means:
+     - 'hostname' is the server name grabbing images and searching for colors
+     - the port used by server is 7070 (chosen by default)
