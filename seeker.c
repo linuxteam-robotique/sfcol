@@ -35,13 +35,14 @@
 #include "objects.h"
 #include "server.h"
 #include "rgb_to_objects.h"
+#include "ramdisk.h"
 
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 
-#define JPG_TEMP_PATH	"/home/cwolfers/ram1/test"
+#define JPG_FILENAME	"sfcol.jpg"
 
 /* Source code handling image_lock mutex */
 
@@ -171,13 +172,13 @@ void		seeker(struct s_seeker_arg	*seeker_arg)
 
       send_image(img, img_size, nbr_img);
 
-      f = open(JPG_TEMP_PATH "/sfcol.jpg", 
+      f = open(JPG_TEMP_PATH JPG_FILENAME, 
 	       O_CREAT | O_TRUNC | O_WRONLY, 
 	       S_IRUSR | S_IWUSR);
       write(f, img, img_size);
       close(f);
 
-      jpeg_to_rgb(JPG_TEMP_PATH "/sfcol.jpg", rgb.img_beg);
+      jpeg_to_rgb(JPG_TEMP_PATH JPG_FILENAME, rgb.img_beg);
 
       pop_seeker_img_end();
 

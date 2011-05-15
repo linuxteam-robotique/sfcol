@@ -27,7 +27,9 @@
 #include "color_name.h"
 #include "jpeg_to_rgb.h"
 
-#define JPG_TEMP_PATH	"/home/cwolfers/ram1/test"
+#include "../ramdisk.h"
+
+#define JPG_FILENAME	"viewer.jpg"
 #define MAX_SIZE_IMAGE	(640 * 480 * 4)
 
 struct vdIn	videoIn;
@@ -477,13 +479,13 @@ static int		spcaClient(char *Ip, short port,
  		/* jpeg_decode(&rgb, buf, &width, &height);  */
 	      {
 		int f;
-		f = open(JPG_TEMP_PATH "/viewer.jpg", 
+		f = open(JPG_TEMP_PATH JPG_FILENAME, 
 			 O_CREAT | O_TRUNC | O_WRONLY, 
 			 S_IRUSR | S_IWUSR);
 		write(f, buf, headerframe->size);
 		close(f);
 
-		jpeg_to_rgb(JPG_TEMP_PATH "/viewer.jpg", rgb.img_beg);
+		jpeg_to_rgb(JPG_TEMP_PATH JPG_FILENAME, rgb.img_beg);
 		/* printf("rgb gotten\n"); fflush(stdout); */
 	      }
 	    else
@@ -700,8 +702,8 @@ int	main (int argc, char *argv[])
     int autobright = 0;
     /*********************************/
     char *AdIpPort;
-    char AdIp[]= "000.000.000.000";
-    unsigned short ports = 0;
+    char AdIp[]= "127.000.000.001";
+    unsigned short ports = 7070;
     unsigned long		img_div_dec = 0;
 
     /*********************************/

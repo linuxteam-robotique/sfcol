@@ -13,7 +13,7 @@
 
 # include "defines.h"
 
-# define MAX_OBJECTS	16
+# define MAX_OBJECTS	32
 # define NBR_PIX_MAX	(200 * 200)
 
 struct			s_object

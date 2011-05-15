@@ -54,8 +54,8 @@ inline enum e_color	rgbToColor(struct s_colr_rgb	*src_rgb)
 
   COLOR2RGB(src_rgb, r, g, b);
   re = r - ((g + b) >> 1);
-  //im = (g - b) * sqrt3s2;
-  im = ((g - b) * 14529495) >> 24; //APPROX SANS FLOTTANT :S
+  im = (g - b) * sqrt3s2;
+  /* im = ((g - b) * 14529495) >> 24; //APPROX SANS FLOTTANT :S */
   md = hypotw(re, im);
   h = phasearg(im, re, md); /* Hue calcul: Hue/360 */
   l = r + g + b; /* Luminosity calcul: Lum/765  (255*3 = 765) */
@@ -65,49 +65,46 @@ inline enum e_color	rgbToColor(struct s_colr_rgb	*src_rgb)
   //max(Sat) ~= 208.21 max trouve par l'essai: 185
 
 
-      if (((h < 30) || (h >= 330)) && (s >= 15))
-	  return red; //0 deg
-      /* else */
-      /* if ((h >= 20) && (h < 40) && (l < 383) && (s >= 30)) */
-      /* 	  return brown; //30 deg */
-      /* else */
-      /* if ((h >= 20) && (h < 45) && (l >= 383) /\*&& (l < 574)*\/ && (s >= 30)) */
-      /* 	  return orange; //30 deg (+ lumineux que marron) */
-      else
-      if ((h >= 40) && (h < 80) && (l >= 383) && (s >= 15))
-	  return yellow; //60 deg
-      else
-      if ((h >= 90) && (h < 150) && (s >= 15))
-	  return green; //120 deg
-      /* else */
-      /* if ((h >= 150) && (h < 210) /\*&& (l >= 64) && (l < 574)*\/ && (s >= 45)) */
-      /* 	  return cyan; //180 deg */
-      else
-	if ((h >= 210) && (h <= 270) && (s >= 15))
-	  return blue; //240 deg
-      /* else */
-      /* if ((h >= 210) && (h <= 270) && (l >= 383) /\*&& (l < 574)*\/ && (s >= 60)) */
-      /* 	  return sky_blue; //240 deg */
-      /* else */
-      /* if ((h >= 270) && (h < 330) /\*&& (l >= 64)*\/ && (l < 574) && (s >= 42)) */
-      /* 	  return magenta; //300 deg */
-      /* else */
-      /* if ((h >= 270) && (h < 330) && (l >= 574) /\*&& (l < 701)*\/ && (s >= 42)) */
-      /* 	  return pink; //300 deg (+ lumineux que magenta) */
-      /* else */
-      /* 	if (l > 665) */
-      /* 	  return white; */
-      else
-        {
-	  if (s < 15)
-	    {
-	      if (l >= 665)
-		return white;
-	      if (l <= 100)
-		return black;
-	    }
-	  return unknown;
+  if ((h >= 30) && (h < 90) && (l >= 200) /*&& (s >= 10)*/)
+    return yellow; //60 deg
+  else
+    if (((h < 30) || (h >= 270)) && (s >= 15))
+      return red; //0 deg
+  else
+    if ((h >= 90) && (h < 200) && (s >= 10))
+      return green; //120 deg
+  else
+    if ((h >= 200) && (h <= 270) && (s >= 15))
+      return blue; //240 deg
+  else
+    if ((h >= 20) && (h < 40) && (l < 383) && (s >= 30))
+      return brown; //30 deg
+  else
+    if ((h >= 20) && (h < 45) && (l >= 383) /*&& (l < 574)*/ && (s >= 30))
+      return orange; //30 deg (+ lumineux que marron)
+  else
+    if ((h >= 150) && (h < 210) /*&& (l >= 64) && (l < 574)*/ && (s >= 45))
+      return cyan; //180 deg
+  else
+    if ((h >= 210) && (h <= 270) && (l >= 383) /*&& (l < 574)*/ && (s >= 60))
+      return sky_blue; //240 deg
+  else
+    if ((h >= 270) && (h < 330) /*&& (l >= 64)*/ && (l < 574) && (s >= 42))
+      return magenta; //300 deg
+  else
+    if ((h >= 270) && (h < 330) && (l >= 574) /*&& (l < 701)*/ && (s >= 42))
+      return pink; //300 deg (+ lumineux que magenta)
+  else
+    {
+      if (s < 30)
+	{
+	  if (l >= 665)
+	    return white;
+	  if (l <= 100)
+	    return black;
 	}
+      return unknown;
+    }
 }
 
 /*!
@@ -606,10 +603,11 @@ void			rgb_to_objects(struct s_object_list	*object_list,
       if (*pix != unknown)
 	continue;
       color = rgbToColor(crgb);
+      *pix = color;
       if ((color == red) || (color == blue) || 
 	  (color == yellow) || (color == black))
 	{
-          *pix = color;
+          /* *pix = color; */
 	  obj = object_list->objects + count;
 	  obj->color = color;
 	  obj->cpt = 0;

@@ -1,7 +1,8 @@
 CC = gcc
 PROG = viewer
 CFLAGS = -W -Wall -g
-LDFLAGS = -llavfile -ljpeg `sdl-config --libs`
+LDFLAGS = -ljpeg `sdl-config --libs`
+#-llavfile
 
 OBJS = viewer.o image_format.o v4l2uvc.o graber.o seeker.o \
        frees.o jpeg_to_rgb.o ms_time.o rgb_to_objects.o \

@@ -26,9 +26,11 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <signal.h>
 #include "server.h"
 #include "objects.h"
 #include "color_name.h"
+#include "sfcol.h"
 
 enum	e_proto
 {
@@ -37,14 +39,22 @@ enum	e_proto
 
 static enum e_proto	protocol = proto_sfcol2;
 static int		data_to_send = -1; /* 0 = jpeg ; 1 = coord */
-static int		server_sockfd, client_sockfd;
+static int		client_sockfd = -1;
+static int		connect_active = 0;
+
+static void	catch_sigpipe()
+{
+  connect_active = 0;
+  printf("Client has disconnected!\n");
+  fflush(stdout);
+}
 
 static void	send_info_proto_sfcol2(struct s_object_list *object_list)
 {
   unsigned int		i;
   struct s_object	*object1;
 
-  if (data_to_send == 1)
+  if (connect_active && (data_to_send == 1))
     write(client_sockfd, object_list, 4);
   for (i = 0; i < object_list->count; ++i)
     {
@@ -54,7 +64,7 @@ static void	send_info_proto_sfcol2(struct s_object_list *object_list)
 	     object1->y,
 	     object1->x,
 	     object1->cpt);
-      if (data_to_send == 1)
+      if (connect_active && (data_to_send == 1))
 	{
 	  write(client_sockfd, &(object1->color), 1);
 	  write(client_sockfd, &(object1->x), 4);
@@ -79,7 +89,7 @@ void	send_image(unsigned char *img, unsigned long img_size, unsigned long nbr_im
   char	buf_read[1024];
   int	err;
 
-  if (data_to_send == 0)
+  if (connect_active && (data_to_send == 0))
     {
       send(client_sockfd, &img_size, 4, 0);
       err = recv(client_sockfd, buf_read, 4, 0);
@@ -95,9 +105,13 @@ void	send_image(unsigned char *img, unsigned long img_size, unsigned long nbr_im
 void	server(struct s_server_arg *server_arg)
 {
   int			server_len;
+  int			server_sockfd;
+  int			new_client_sockfd;
   socklen_t		client_len;
   struct sockaddr_in	server_address;
   struct sockaddr_in	client_address;
+
+  signal(SIGPIPE, catch_sigpipe);
 
   server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -115,14 +129,20 @@ void	server(struct s_server_arg *server_arg)
   printf("Server @%08X\n", server_address.sin_addr.s_addr);
 
   listen(server_sockfd, 1);
+  while (run)
+    {
+      client_len = sizeof (client_address);
+      new_client_sockfd = accept(server_sockfd,
+				 (struct sockaddr *) &client_address,
+				 &client_len);
+      if (client_sockfd != -1)
+	close(client_sockfd);
+      client_sockfd = new_client_sockfd;
 
-  client_len = sizeof (client_address);
-  client_sockfd = accept(server_sockfd,
-			 (struct sockaddr *) &client_address,
-			 &client_len);
+      read(client_sockfd, &data_to_send, 4);
 
-  read(client_sockfd, &data_to_send, 4);
-
+      connect_active = 1;
+    }
   /* pthread_mutex_lock(&server_stop); //Lock */
   /* pthread_mutex_lock(&server_stop); //Stop ... wait unlock! */
 

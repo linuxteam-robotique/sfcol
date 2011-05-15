@@ -35,6 +35,18 @@ struct		my_error_mgr
   jmp_buf		setjmp_buffer; /* for return to caller */
 };
 
+static void	rgb2bgr(struct s_colr_rgb *row, unsigned long width)
+{
+  unsigned char	r;
+
+  for (; width; --width, ++row)
+    {
+      r = row->r;
+      row->r = row->b;
+      row->b = r;
+    }
+}
+
 int	jpeg_to_rgb(char *jpg_img, struct s_colr_rgb *rgb_img)
 {
   struct jpeg_decompress_struct	cinfo;
@@ -64,6 +76,7 @@ int	jpeg_to_rgb(char *jpg_img, struct s_colr_rgb *rgb_img)
     {
       row = rgb_img + cinfo.output_scanline * cinfo.output_width;
       jpeg_read_scanlines(&cinfo, (JSAMPARRAY) &row, 1);
+      rgb2bgr(row, cinfo.output_width);
     }
 				      
   jpeg_finish_decompress(&cinfo);
