@@ -42,20 +42,36 @@ static int		data_to_send = -1; /* 0 = jpeg ; 1 = coord */
 static int		client_sockfd = -1;
 static int		connect_active = 0;
 
-static void	catch_sigpipe()
+static int		server_sockfd;
+
+
+static void	catch_sigpipe(/*int sig*/)
 {
   connect_active = 0;
   printf("Client has disconnected!\n");
   fflush(stdout);
 }
 
+void	dispose_server(void)
+{
+  connect_active = 0;
+  shutdown(client_sockfd, SHUT_RDWR);
+  close(client_sockfd);
+  close(server_sockfd);
+}
+
 static void	send_info_proto_sfcol2(struct s_object_list *object_list)
 {
   unsigned int		i;
   struct s_object	*object1;
+  /* unsigned long		count = 0; */
+  int			info_to_send = connect_active && (data_to_send == 1);
 
-  if (connect_active && (data_to_send == 1))
-    write(client_sockfd, object_list, 4);
+  if (info_to_send)
+    {
+      write(client_sockfd, &(object_list->count), 4);
+      /* read(client_sockfd, &count, 4); */
+    }
   for (i = 0; i < object_list->count; ++i)
     {
       object1 = object_list->objects + i;
@@ -64,7 +80,7 @@ static void	send_info_proto_sfcol2(struct s_object_list *object_list)
 	     object1->y,
 	     object1->x,
 	     object1->cpt);
-      if (connect_active && (data_to_send == 1))
+      if (info_to_send)
 	{
 	  write(client_sockfd, &(object1->color), 1);
 	  write(client_sockfd, &(object1->x), 4);
@@ -105,7 +121,6 @@ void	send_image(unsigned char *img, unsigned long img_size, unsigned long nbr_im
 void	server(struct s_server_arg *server_arg)
 {
   int			server_len;
-  int			server_sockfd;
   int			new_client_sockfd;
   socklen_t		client_len;
   struct sockaddr_in	server_address;

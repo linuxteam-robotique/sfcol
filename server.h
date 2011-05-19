@@ -28,6 +28,8 @@ struct			s_server_arg
   unsigned short	server_port;
 };
 
+void	dispose_server(void);
+
 void	send_info(struct s_object_list *object_list);
 void	send_image(unsigned char *img, unsigned long img_size, unsigned long nbr_img);
 

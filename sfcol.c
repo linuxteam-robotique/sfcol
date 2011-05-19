@@ -42,8 +42,9 @@ int	run = 1;
 
 static void	sigcatch()
 {
-  fprintf(stderr, "Exiting...\n");
   run = 0;
+  dispose_server();
+  fprintf(stderr, "Exiting...\n");
 }
 
 static void		exec_threads(struct vdIn	*videoIn,
@@ -52,7 +53,7 @@ static void		exec_threads(struct vdIn	*videoIn,
 {
   pthread_t		thread_graber;
   pthread_t		thread_seeker;
-  static pthread_t	thread_server;
+  pthread_t		thread_server;
   struct s_graber_arg	graber_arg = { videoIn };
   struct s_seeker_arg	seeker_arg = { videoIn, movie_filename };
   struct s_server_arg	server_arg = { server_port };
@@ -65,7 +66,8 @@ static void		exec_threads(struct vdIn	*videoIn,
 
   pthread_join(thread_graber, NULL);
   pthread_join(thread_seeker, NULL);
-  pthread_join(thread_server, NULL);
+  /* pthread_join(thread_server, NULL); */
+  pthread_cancel(thread_server);
 
   free_graber_comm();
 }
